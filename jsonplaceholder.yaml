@@ -1,0 +1,59 @@
+# I was testing with dummy API that sent fake responses
+# so some of the tests cannot be actually written
+---
+- config:
+    - testset: "Sample CRUD operation"
+    - variable_binds: {'TITLE':'lestertest', 'NEW_TITLE':'lestertestupdate'}
+
+- test:
+    - group: "Sample"
+    - name: "Get all the first 100 post"
+    - url: "https://jsonplaceholder.typicode.com/posts?"
+
+- test:
+    - group: "Sample"
+    - name: "create a post"
+    - url: "https://jsonplaceholder.typicode.com/posts"
+    - method: "POST"
+    - body: {template: '{"TITLE": "$TITLE"}' }
+    - headers: {'Content-Type': 'application/json', 'X-Client-Id': 'qa-test'}
+    - extract_binds:
+        - 'ID': { jsonpath_mini: "id"}    
+
+- test:
+    - group: "Sample"
+    - name: "get on the post you just submitted"
+    - url: {'template': "https://jsonplaceholder.typicode.com/posts/$ID"}
+    - headers: {'X-Client-Id': 'qa-test'}
+    - expected_status: [404] #if it was not a fake api, this would be 200
+
+- test:
+    - group: "Sample"
+    - name: "update a post"
+    - url: {'template': "https://jsonplaceholder.typicode.com/posts/1"} # would actually use extracted ID
+    - method: "PUT"
+    - body: {template: '{"TITLE": "$NEW_TITLETITLE"}' }
+    - headers: {'Content-Type': 'application/json'}
+
+# - test:
+#     - group: "Sample"
+#     - name: "Get merchant to validate updates"
+#     - url: {'template': "$LOCATION"}
+#     - headers: {'X-Client-Id': 'qa-test'}
+#     - validators:
+#       - compare: {'jsonpath_mini': 'name', comparator: 'str_eq', expected: {template: '$NEW_NAME'}}
+
+- test:
+    - group: "Sample"
+    - name: "Delete merchant record you just created"
+    - url: {'template': "https://jsonplaceholder.typicode.com/posts/1"}
+    - headers: {'X-Client-Id': 'qa-test'}
+    - method: "DELETE"
+
+# - test:
+#     - group: "Sample"
+#     - name: "Check if merchant recorded is actually deleted"
+#     - url: {'template': "$LOCATION"}
+#     - headers: {'X-Client-Id': 'qa-test'}
+#     - method: "GET"
+#     - expected_status: [404]
